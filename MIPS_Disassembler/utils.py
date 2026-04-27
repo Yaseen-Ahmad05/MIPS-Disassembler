@@ -1,13 +1,4 @@
-def hex_to_bin(hex_str):
-    try:
-        hex_str = hex_str.strip()
-        if hex_str.startswith("0x"):
-            hex_str = hex_str[2:]
-        if len(hex_str) != 8 or any(c not in "0123456789abcdefABCDEF" for c in hex_str):
-            raise ValueError
-        return format(int(hex_str, 16), "032b")
-    except ValueError:
-        raise ValueError(f"Invalid hex string: {hex_str}")
+
 
 def get_registers():
     return [

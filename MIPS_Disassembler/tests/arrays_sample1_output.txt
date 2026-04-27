@@ -1,0 +1,8 @@
+lui $t0, 4097
+addi $t1, $zero, 0
+loop_1:
+lw $t2, 0($t0)
+addi $t0, $t0, 4
+addi $t1, $t1, 1
+slti $zero, $t1, 10
+bne $t1, $zero, loop_1

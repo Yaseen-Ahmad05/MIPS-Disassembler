@@ -1,0 +1,7 @@
+slt $t2, $t0, $t1
+slti $t1, $t0, -10
+sltu $t2, $t0, $t1
+sltiu $t1, $t0, 10
+loop_1:
+beq $t0, $t1, 0x0040001c
+bne $t0, $t1, loop_1

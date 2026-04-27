@@ -1,0 +1,8 @@
+jal func_1
+addi $t0, $zero, 1
+j loop_1
+func_1:
+addi $v0, $zero, 5
+jr $ra
+loop_1:
+add $zero, $zero, $zero
