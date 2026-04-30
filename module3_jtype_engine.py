@@ -1,5 +1,6 @@
-from module1_itype import decode_itype
+from module1_itype import decode_itype, process_pseudo_branches
 from module2_rtype import decode_rtype
+import re
 
 BRANCH_OPCODES = {0x04, 0x05} # beq, bne
 
@@ -43,21 +44,60 @@ def analyze_pass1(binary_instructions, base_address):
         elif opcode in [0x02, 0x03]: # J-Type
             target = jump_target(bin_str, pc)
             if target in valid_addresses and target not in labels:
-                if opcode == 0x03:
+                if target < pc:
+                    labels[target] = f"loop_{label_counter}"
+                    label_counter += 1
+                elif opcode == 0x03 and target > pc:
                     labels[target] = f"func_{func_counter}"
                     func_counter += 1
                 else:
-                    labels[target] = f"loop_{label_counter}"
+                    labels[target] = f"label_{label_counter}"
                     label_counter += 1
         else: # I-Type
             if opcode in BRANCH_OPCODES:
                 target = branch_target(bin_str, pc)
                 if target in valid_addresses and target not in labels:
-                    labels[target] = f"loop_{label_counter}"
-                    label_counter += 1
+                    if target < pc:
+                        labels[target] = f"loop_{label_counter}"
+                        label_counter += 1
+                    else:
+                        labels[target] = f"label_{label_counter}"
+                        label_counter += 1
         pc += 4
         
     return labels
+
+def process_array_accesses(assembly_lines):
+    for i in range(2, len(assembly_lines)):
+        def get_inst(line):
+            if ":\n" in line:
+                return line.split(":\n", 1)[1]
+            return line
+            
+        inst1 = get_inst(assembly_lines[i-2])
+        inst2 = get_inst(assembly_lines[i-1])
+        inst3 = get_inst(assembly_lines[i])
+        
+        sll_match = re.match(r'^sll\s+(\$\w+),\s+(\$\w+),\s+2$', inst1)
+        addu_match = re.match(r'^addu\s+(\$\w+),\s+(\$\w+),\s+(\$\w+)$', inst2)
+        lw_match = re.match(r'^lw\s+(\$\w+),\s+(-?\d+)\((\$\w+)\)$', inst3)
+        
+        if sll_match and addu_match and lw_match:
+            sll_rd, sll_rt = sll_match.groups()
+            addu_rd, addu_rs, addu_rt = addu_match.groups()
+            lw_rt, lw_imm, lw_rs = lw_match.groups()
+            
+            if sll_rd == addu_rd and addu_rd == lw_rs:
+                base_reg = None
+                if addu_rs == sll_rd:
+                    base_reg = addu_rt
+                elif addu_rt == sll_rd:
+                    base_reg = addu_rs
+                    
+                if base_reg:
+                    assembly_lines[i] += f" # Array access: base {base_reg}, index {sll_rt}"
+                    
+    return assembly_lines
 
 def disassemble(binary_instructions, base_address=0x00400000):
     labels = analyze_pass1(binary_instructions, base_address)
@@ -92,4 +132,7 @@ def disassemble(binary_instructions, base_address=0x00400000):
         assembly.append(line)
         pc += 4
         
+    assembly = process_array_accesses(assembly)
+    assembly = process_pseudo_branches(assembly)
+    
     return assembly

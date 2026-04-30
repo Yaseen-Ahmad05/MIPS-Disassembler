@@ -17,10 +17,17 @@ The disassembler supports the following exact instruction set:
 - I-Type: addi, addiu, andi, beq, bne, lbu, lhu, lui, lw, ori, slti, sltiu, sb, sh, sw
 - J-Type: j, jal
 
-Prerequisites
--------------
-- Python 3.6 or higher.
-- No external packages are required.
+Dependencies
+------------
+Only standard Python 3.x is needed.
+No external packages or pip installs are required.
+
+GUI Instructions
+----------------
+A simple graphical user interface is provided via `gui.py`.
+To run the GUI:
+   python3 gui.py
+Use the 'Browse' buttons to select your input binary file and your desired output destination, then click 'Process'.
 
 How to Run
 ----------
@@ -41,6 +48,8 @@ The disassembler calculates the addresses starting at 0x00400000 (standard MIPS 
 Testing
 -------
 To make grading easy, there is a "tests" folder containing specific binary sample files for each of the grading criteria, along with their expected outputs.
+
+The naming convention maps each input file directly to an expected output file (e.g., `tests/arithmetic_sample1.txt` corresponds to `tests/arithmetic_sample1_output.txt`). Refer to `test_summary.md` for a complete breakdown of which features are tested in which files.
 
 You can test a file manually against the disassembler like so:
    python main.py tests/arithmetic_sample1.txt my_output.txt

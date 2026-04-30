@@ -1,0 +1,13 @@
+loop_3:
+sll $t0, $s1, 2
+addu $t0, $t0, $s2
+lw $t1, 0($t0) # Array access: base $s2, index $s1
+blt $s0, $s1, label_1
+sll $zero, $zero, 0
+label_1:
+ble $t1, $t0, label_2
+sll $zero, $zero, 0
+label_2:
+jal 0x00400030
+sll $zero, $zero, 0
+j loop_3
